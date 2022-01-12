@@ -4,6 +4,7 @@ import Head from "next/head";
 import { IoMdArrowBack } from "react-icons/io";
 import LinkWrapper from "../components/link";
 
+//error. fallback for failed server rendered pages.
 const Error: NextPage = ({ data }) => {
   return (
     <div className="font-mono text-offwhite flex flex-col items-center justify-center min-h-screen">
