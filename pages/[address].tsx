@@ -3,19 +3,13 @@ import Head from "next/head";
 import ProfileBannerImg from "../public/profileBanner.png";
 import Banner from "../components/banner";
 import Avatar from "../components/avatar";
-import LinkWrapper from "../components/link";
+
 import KPI from "../components/kpi";
 import Status from "../components/status";
 import Table from "../components/table";
 
-import {
-  FaWallet,
-  FaChartBar,
-  FaSquareFull,
-  FaRegCopy,
-  FaHeart,
-} from "react-icons/fa";
-import { RiRadarFill } from "react-icons/ri";
+import { FaChartBar, FaRegCopy, FaHeart } from "react-icons/fa";
+
 import {
   getBlockAddress,
   getCritterzCount,

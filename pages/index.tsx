@@ -1,14 +1,13 @@
 import type { NextPage } from "next";
 import Head from "next/head";
-import Image from "next/image";
-import MainBannerImg from "../public/MainBanner.png";
+import MainBannerImg from "../public/mainBanner.png";
 import CritterzImg from "../public/critterz.gif";
 import Banner from "../components/banner";
 import Avatar from "../components/avatar";
 import SearchBar from "../components/searchBar";
 import LinkWrapper from "../components/link";
 import KPI from "../components/kpi";
-import axios from "axios";
+
 import {
   FaChartBar,
   FaHeart,
