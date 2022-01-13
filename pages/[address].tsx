@@ -5,14 +5,24 @@ import Banner from "../components/banner";
 import Avatar from "../components/avatar";
 
 import KPI from "../components/kpi";
+import TokenCard from "../components/tokenCard";
 import Status from "../components/status";
 import Table from "../components/table";
 
-import { FaChartBar, FaRegCopy, FaHeart } from "react-icons/fa";
+import {
+  FaChartBar,
+  FaRegCopy,
+  FaHeart,
+  FaHandHolding,
+  FaHandHoldingUsd,
+  FaCubes,
+  FaTag,
+} from "react-icons/fa";
 
 import {
   getBlockAddress,
   getCritterzCount,
+  getCritterzOwned,
   getCritterzRented,
   getPlayerInfo,
   getPlotsCount,
@@ -77,7 +87,6 @@ const Overview: NextPage = ({ data }) => {
         {/* HERO */}
         <Banner src={ProfileBannerImg} />
         <Avatar src={data.profile.avatar} />
-
         {/* PROFILE NAME */}
         <div className="relative overflow-hidden flex items-center -mt-6 bg-darkgreen px-3 py-2 border border-gray-700 text-xl rounded-2xl">
           {data.profile.containsMCInfo === false &&
@@ -87,7 +96,6 @@ const Overview: NextPage = ({ data }) => {
 
           {data.profile.containsMCInfo !== false && data.profile.name}
         </div>
-
         {/* ADDRESS */}
         <p
           className="mt-2 text-xs text-gray-700 flex items-center hover:underline cursor-pointer"
@@ -101,13 +109,13 @@ const Overview: NextPage = ({ data }) => {
             data.profile.address.slice(-4)}{" "}
           <FaRegCopy />
         </p>
-
         <Status
           logoutTimestamp={data.profile.logoutTimestamp}
           timePerEpoch={data.profile.timePerEpoch}
         />
 
         <div className="w-5/6">
+          {/* <hr className="border-gray-900 mt-5" /> */}
           {/* Account Overview */}
           <p className=" flex justify-end items-center text-sm m-1 text-right mt-5">
             <FaChartBar />
@@ -176,21 +184,96 @@ const Overview: NextPage = ({ data }) => {
               unit="$block"
               description="total $block"
             />
-            <KPI value={"-"} unit="$USD" description="net worth est." />
+            {/* <KPI value={"-"} unit="$USD" description="net worth est." /> */}
           </div>
+
+          <hr className="border-gray-700 mt-5" />
+
+          {/* UNSTAKED CRITTERZ */}
+          {data.tokenHoldings.critterzOwned.unstaked.length !== 0 && (
+            <p className=" flex justify-end items-center text-sm m-1 text-right mt-5">
+              <FaHandHolding />
+              &nbsp;unstaked Critterz.
+            </p>
+          )}
+
+          <div className="flex flex-row-reverse overflow-x-auto border-l border-gray-700 bg-darkgreen">
+            {data.tokenHoldings.critterzOwned.unstaked.map(
+              (tokenId: string) => {
+                return (
+                  <TokenCard
+                    key={tokenId}
+                    title={`#${tokenId}`}
+                    tokenId={tokenId}
+                    contract={`${process.env.NEXT_PUBLIC_CRITTERZ_CONTRACT_ADDRESS}`}
+                    description="sCritterz"
+                  />
+                );
+              }
+            )}
+          </div>
+
+          {/* STAKED CRITTERZ */}
+          {data.tokenHoldings.critterzOwned.staked.length !== 0 && (
+            <p className=" flex justify-end items-center text-sm m-1 text-right mt-5">
+              <FaHandHoldingUsd />
+              &nbsp;staked Critterz.
+            </p>
+          )}
+
+          <div className="flex flex-row-reverse overflow-x-auto border-l border-gray-700 bg-darkgreen">
+            {data.tokenHoldings.critterzOwned.staked.map((tokenId: string) => {
+              return (
+                <TokenCard
+                  key={tokenId}
+                  title={`#${tokenId}`}
+                  tokenId={tokenId}
+                  contract={`${process.env.NEXT_PUBLIC_SCRITTERZ_CONTRACT_ADDRESS}`}
+                  description="sCritterz"
+                />
+              );
+            })}
+          </div>
+
+          {/* RENTED CRITTERZ */}
+          {data.tokenHoldings.critterzRented.tokens.length !== 0 && (
+            <p className=" flex justify-end items-center text-sm m-1 text-right mt-5">
+              <FaTag />
+              &nbsp;leased Critterz.
+            </p>
+          )}
+
+          <div className="flex flex-row-reverse overflow-x-auto border-l border-gray-700 bg-darkgreen">
+            {data.tokenHoldings.critterzRented.tokens.map((tokenId: string) => {
+              return (
+                <TokenCard
+                  key={tokenId}
+                  title={`#${tokenId}`}
+                  tokenId={tokenId}
+                  contract={`${process.env.NEXT_PUBLIC_SCRITTERZ_CONTRACT_ADDRESS}`}
+                  description="sCritterz"
+                />
+              );
+            })}
+          </div>
+
+          <hr className="border-gray-700 mt-10" />
+
           <p className=" flex justify-end items-center text-sm m-1 text-right mt-5">
-            <FaChartBar />
-            &nbsp;performance breakdown.
+            <FaCubes />
+            &nbsp;playtime/$BLOCK performance breakdown.
           </p>
           <div className="border border-gray-700">
             <Chart timePerEpoch={data.profile.timePerEpoch} />
-            <Table
-              profile={data.profile}
-              address={data.address}
-              blockInfo={data.block}
-              critterzInfo={data.critterz}
-              critterzRented={data.tokenHoldings.critterzRented.tokens}
-            />
+            <div className="max-h-72 overflow-auto">
+              <Table
+                profile={data.profile}
+                address={data.address}
+                blockInfo={data.block}
+                critterzInfo={data.critterz}
+                critterzRented={data.tokenHoldings.critterzRented.tokens}
+              />
+            </div>
           </div>
 
           <p className=" flex justify-end items-center text-sm m-1 text-right mt-10">
@@ -214,6 +297,7 @@ export async function getServerSideProps(context: { params: any }) {
     const block = await getBlockAddress(address);
     const critterz = await getCritterzCount(address);
     const critterzRented = await getCritterzRented(address);
+    const critterzOwned = await getCritterzOwned(address);
     const plots = await getPlotsCount(address);
     const profile = await getPlayerInfo(address);
 
@@ -226,6 +310,7 @@ export async function getServerSideProps(context: { params: any }) {
           address,
           profile,
           tokenHoldings: {
+            critterzOwned,
             critterzRented,
           },
         },

@@ -45,7 +45,7 @@ const Home: NextPage = ({ data }) => {
         <meta name="twitter:title" content="Critterz Tracker" />
         <meta
           name="twitter:description"
-          content={`track your critterz journey. ${(
+          content={`track your critterz journey. | ${(
             (data.critterz.stakedCount / data.critterz.stats.count) *
             100
           ).toFixed(2)}% staked. ${data.critterz.stats.floor_price.toFixed(
@@ -131,14 +131,14 @@ const Home: NextPage = ({ data }) => {
           <div className="flex flex-wrap justify-end">
             <KPI
               value={data.serverStats.us}
-              unit="US"
+              unit="online"
               description="player count"
             />
-            <KPI
-              value={data.serverStats.asia}
-              unit="ASIA"
-              description="player count"
-            />
+            {/* <KPI
+              value={data.serverStats.status}
+              unit="status"
+              description="server status"
+            /> */}
           </div>
 
           {/* OFFICIAL LINKS */}

@@ -20,19 +20,23 @@ const Row = ({
   return (
     <div
       className={
-        "flex items-center border border-x-0 border-b-0 bg-darkgreen w-full border-gray-700 text-xs p-2 bordeer-collapse" +
+        "flex items-center border border-x-0 border-b-0 bg-darkgreen w-full border-gray-700 text-xs p-1" +
         className
       }
     >
-      <table className="table-auto border-collapse m-3 w-full">
+      <table className="table-auto w-full relative border-separate">
         <thead>
           <tr>
-            <th className="border border-gray-700 p-1">player.</th>
-            <th className="border border-gray-700 p-1">$BLOCK earned.</th>
-            <th className="border border-gray-700 p-1">
+            <th className="border bg-darkgreen border-gray-700 p-1 sticky top-0 px-6">
+              player.
+            </th>
+            <th className="border bg-darkgreen border-gray-700 p-1 sticky top-0">
+              $BLOCK earned.
+            </th>
+            <th className="border bg-darkgreen border-gray-700 p-1 sticky top-0">
               14d average playtime.
             </th>
-            <th className="border border-gray-700 p-1">
+            <th className="border bg-darkgreen border-gray-700 p-1 sticky top-0">
               est. daily $BLOCK output.
             </th>
           </tr>

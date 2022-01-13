@@ -36,7 +36,6 @@ const Row = ({
   blockEarned: any;
 }) => {
   const [playTime, setPlayTime] = useState(0);
-  const [estBlock, setEstBlock] = useState(0);
   const [username, setUsername] = useState(
     address.slice(0, 5) + "..." + address.slice(-5)
   );
@@ -52,11 +51,14 @@ const Row = ({
           `/api/critterz/${address}/owned`
         );
 
+        const tokenTotals = await axios.get(`/api/critterz/${address}/count`);
+        const totalRented = tokenTotals.data.totalRented;
+
         const profile = response.data;
         setPlayTime(getAverage(profile.timePerEpoch, 14).toFixed(2));
 
-        const ownedTokens = ownedTokenFetch.data.tokens;
-        setOwned(ownedTokens.length);
+        const ownedTokens = ownedTokenFetch.data.staked;
+        setOwned(totalRented);
 
         let intersect = ownedTokens.filter((x: any) =>
           critterzRented.includes(x)
@@ -78,9 +80,9 @@ const Row = ({
     <tr
       className={`hover:bg-white/5 ${loading ? " opacity-20 " : "opacity-100"}`}
     >
-      <td>
+      <td className="pl-4">
         <Link href={`/${address}`}>
-          <div className="flex items-center justify-center">
+          <div className="flex items-center">
             <p className="hover:underline cursor-pointer ">
               {username}({rented}/{owned})
             </p>

@@ -60,7 +60,7 @@ const Row = ({
 }) => {
   return (
     <tr className={`font-bold ${className}`}>
-      <td className="text-center">You</td>
+      <td className="pl-4 text-left">You</td>
       <td className="text-center">{getTotalBlock(blockEarned).toFixed(2)}</td>
       <td className="text-center">{getAverage(timePerEpoch, 14).toFixed(2)}</td>
       <td className="text-center">

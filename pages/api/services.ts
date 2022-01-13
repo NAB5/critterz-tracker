@@ -51,7 +51,7 @@ export async function getBlockAddress(address: string) {
 
   try {
     const walletHolding = await axios.get(
-      `${process.env.MORALIS_WEB3_ENDPOINT}/${address}/erc20?chain=eth&token_addresses=${process.env.BLOCK_CONTRACT_ADDRESS}`,
+      `${process.env.MORALIS_WEB3_ENDPOINT}/${address}/erc20?chain=eth&token_addresses=${process.env.NEXT_PUBLIC_BLOCK_CONTRACT_ADDRESS}`,
       {
         headers: {
           "X-API-Key": `${process.env.MORALIS_API_KEY}`,
@@ -78,7 +78,7 @@ export async function getBlockAddress(address: string) {
 export async function getBlockPrice() {
   try {
     const result = await axios.get(
-      `${process.env.MORALIS_WEB3_ENDPOINT}/erc20/${process.env.BLOCK_CONTRACT_ADDRESS}/price?chain=eth`,
+      `${process.env.MORALIS_WEB3_ENDPOINT}/erc20/${process.env.NEXT_PUBLIC_BLOCK_CONTRACT_ADDRESS}/price?chain=eth`,
       {
         headers: {
           "X-API-Key": `${process.env.MORALIS_API_KEY}`,
@@ -137,7 +137,7 @@ export async function getCritterzCount(address: string) {
       OwnerTokenCountQuery,
       {
         account_address: address,
-        token_address: process.env.SCRITTERZ_CONTRACT_ADDRESS,
+        token_address: process.env.NEXT_PUBLIC_SCRITTERZ_CONTRACT_ADDRESS,
       }
     );
 
@@ -146,7 +146,7 @@ export async function getCritterzCount(address: string) {
       OwnerTokenCountQuery,
       {
         account_address: address,
-        token_address: process.env.CRITTERZ_CONTRACT_ADDRESS,
+        token_address: process.env.NEXT_PUBLIC_CRITTERZ_CONTRACT_ADDRESS,
       }
     );
 
@@ -183,7 +183,7 @@ export async function getCritterzRented(address: string) {
       RentedTokensQuery,
       {
         args: {
-          _token_address: `${process.env.SCRITTERZ_CONTRACT_ADDRESS}`,
+          _token_address: `${process.env.NEXT_PUBLIC_SCRITTERZ_CONTRACT_ADDRESS}`,
           account_address: `${address}`,
         },
       }
@@ -208,7 +208,7 @@ export async function getCritterzOwned(address: string) {
   try {
     address = convertAddressToChecksum(address);
     const OwnerTokensQuery = gql`
-      query Tokens_of_renter($args: tokens_of_owner_args!) {
+      query Tokens_of_owner($args: tokens_of_owner_args!) {
         tokens_of_owner(args: $args) {
           token_id
         }
@@ -220,21 +220,40 @@ export async function getCritterzOwned(address: string) {
       OwnerTokensQuery,
       {
         args: {
-          _token_address: `${process.env.SCRITTERZ_CONTRACT_ADDRESS}`,
+          _token_address: `${process.env.NEXT_PUBLIC_CRITTERZ_CONTRACT_ADDRESS}`,
           account_address: `${address}`,
         },
       }
     );
 
-    let toReturn: string[] = [];
+    const StakedOwnerToken = await request(
+      process.env.CRITTERZ_GRAPHQL_ENDPOINT as string,
+      OwnerTokensQuery,
+      {
+        args: {
+          _token_address: `${process.env.NEXT_PUBLIC_SCRITTERZ_CONTRACT_ADDRESS}`,
+          account_address: `${address}`,
+        },
+      }
+    );
+
+    let unstaked: string[] = [];
     if (ownerToken.tokens_of_owner) {
-      toReturn = ownerToken.tokens_of_owner.map((token: any) => {
+      unstaked = ownerToken.tokens_of_owner.map((token: any) => {
+        return token.token_id;
+      });
+    }
+
+    let staked: string[] = [];
+    if (StakedOwnerToken.tokens_of_owner) {
+      staked = StakedOwnerToken.tokens_of_owner.map((token: any) => {
         return token.token_id;
       });
     }
 
     return {
-      tokens: toReturn,
+      unstaked,
+      staked,
     };
   } catch (e) {
     throw e;
@@ -244,7 +263,7 @@ export async function getCritterzOwned(address: string) {
 export async function getCritterzAddress(address: string) {
   try {
     const critterzNFT = await axios.get(
-      `${process.env.MORALIS_WEB3_ENDPOINT}/${address}/nft?chain=eth&token_addresses=${process.env.CRITTERZ_CONTRACT_ADDRESS}`,
+      `${process.env.MORALIS_WEB3_ENDPOINT}/${address}/nft?chain=eth&token_addresses=${process.env.NEXT_PUBLIC_CRITTERZ_CONTRACT_ADDRESS}`,
       {
         headers: {
           "X-API-Key": `${process.env.MORALIS_API_KEY}`,
@@ -253,7 +272,7 @@ export async function getCritterzAddress(address: string) {
     );
 
     const scritterzNFT = await axios.get(
-      `${process.env.MORALIS_WEB3_ENDPOINT}/${address}/nft?chain=eth&token_addresses=${process.env.SCRITTERZ_CONTRACT_ADDRESS}`,
+      `${process.env.MORALIS_WEB3_ENDPOINT}/${address}/nft?chain=eth&token_addresses=${process.env.NEXT_PUBLIC_CRITTERZ_CONTRACT_ADDRESS}`,
       {
         headers: {
           "X-API-Key": `${process.env.MORALIS_API_KEY}`,
@@ -959,17 +978,12 @@ export async function getServerStats() {
     const usResponse = await axios.get(
       `${process.env.MC_SERVERSTATS_ENDPOINT}/us.critterz.xyz`
     );
-    const asiaResponse = await axios.get(
-      `${process.env.MC_SERVERSTATS_ENDPOINT}/asia.critterz.xyz`
-    );
-
     const us = usResponse.data;
-    const asia = asiaResponse.data;
 
-    if (us.online && asia.online) {
+    if (us.online) {
       return {
         us: us.players.online,
-        asia: asia.players.online,
+        status: "online",
       };
     }
 
@@ -978,6 +992,517 @@ export async function getServerStats() {
       asia: 0,
     };
   } catch (e) {
+    throw e;
+  }
+}
+
+// export async function getTokenMetadata(tokenId: string, contract: string) {
+//   try {
+//     const tokenMetadata = await axios.get(
+//       // https://deep-index.moralis.io/api/v2/nft/asd/asd?chain=eth&format=decimal
+//       `${process.env.MORALIS_WEB3_ENDPOINT}/nft/${contract}/${tokenId}?chain=eth&format=decimal`,
+//       {
+//         headers: {
+//           "X-API-Key": `${process.env.MORALIS_API_KEY}`,
+//         },
+//       }
+//     );
+
+//     // console.log(tokenMetadata.data.token_uri);
+//     // let metadata = Buffer.from(tokenMetadata.data.token_uri, "base64");
+//     // console.log(metadata.toString());
+//     // metadata = JSON.parse(metadata.toString());
+
+//     return {
+//       test: tokenMetadata.data.token_uri,
+//     };
+//   } catch (e: any) {
+//     throw e;
+//   }
+// }
+
+export async function getMetadata(contract: string, tokenId: string) {
+  try {
+    const metadata = await axios.post(
+      `${process.env.MORALIS_WEB3_ENDPOINT}/${process.env.NEXT_PUBLIC_SCRITTERZ_CONTRACT_ADDRESS}/function?chain=eth&function_name=tokenURI`,
+      {
+        abi: [
+          {
+            anonymous: false,
+            inputs: [
+              {
+                indexed: true,
+                internalType: "address",
+                name: "owner",
+                type: "address",
+              },
+              {
+                indexed: true,
+                internalType: "address",
+                name: "approved",
+                type: "address",
+              },
+              {
+                indexed: true,
+                internalType: "uint256",
+                name: "tokenId",
+                type: "uint256",
+              },
+            ],
+            name: "Approval",
+            type: "event",
+          },
+          {
+            anonymous: false,
+            inputs: [
+              {
+                indexed: true,
+                internalType: "address",
+                name: "owner",
+                type: "address",
+              },
+              {
+                indexed: true,
+                internalType: "address",
+                name: "operator",
+                type: "address",
+              },
+              {
+                indexed: false,
+                internalType: "bool",
+                name: "approved",
+                type: "bool",
+              },
+            ],
+            name: "ApprovalForAll",
+            type: "event",
+          },
+          {
+            anonymous: false,
+            inputs: [
+              {
+                indexed: true,
+                internalType: "address",
+                name: "delegate",
+                type: "address",
+              },
+              {
+                indexed: true,
+                internalType: "uint256",
+                name: "roles",
+                type: "uint256",
+              },
+            ],
+            name: "DelegateUpdated",
+            type: "event",
+          },
+          {
+            anonymous: false,
+            inputs: [
+              {
+                indexed: true,
+                internalType: "address",
+                name: "previousOwner",
+                type: "address",
+              },
+              {
+                indexed: true,
+                internalType: "address",
+                name: "newOwner",
+                type: "address",
+              },
+            ],
+            name: "OwnershipTransferred",
+            type: "event",
+          },
+          {
+            anonymous: false,
+            inputs: [
+              {
+                indexed: true,
+                internalType: "address",
+                name: "from",
+                type: "address",
+              },
+              {
+                indexed: true,
+                internalType: "address",
+                name: "to",
+                type: "address",
+              },
+              {
+                indexed: true,
+                internalType: "uint256",
+                name: "tokenId",
+                type: "uint256",
+              },
+            ],
+            name: "Transfer",
+            type: "event",
+          },
+          {
+            inputs: [],
+            name: "BURN_ROLE",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [],
+            name: "DEFAULT_LOCK_DURATION",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [],
+            name: "LOCK_ROLE",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [],
+            name: "MINT_ROLE",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [],
+            name: "TRANSFER_ROLE",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "to", type: "address" },
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+            ],
+            name: "approve",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "owner", type: "address" },
+            ],
+            name: "balanceOf",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+            ],
+            name: "burn",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [{ internalType: "address", name: "", type: "address" }],
+            name: "delegates",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+            ],
+            name: "getApproved",
+            outputs: [{ internalType: "address", name: "", type: "address" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+            ],
+            name: "getLease",
+            outputs: [
+              {
+                components: [
+                  {
+                    internalType: "address",
+                    name: "provenance",
+                    type: "address",
+                  },
+                  {
+                    internalType: "uint48",
+                    name: "lockExpiration",
+                    type: "uint48",
+                  },
+                ],
+                internalType: "struct ERC721Staked.Lease",
+                name: "lease",
+                type: "tuple",
+              },
+            ],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+            ],
+            name: "getLockDuration",
+            outputs: [
+              {
+                internalType: "uint256",
+                name: "lockDuration",
+                type: "uint256",
+              },
+            ],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "delegate", type: "address" },
+              { internalType: "uint256", name: "roles", type: "uint256" },
+            ],
+            name: "hasRoles",
+            outputs: [{ internalType: "bool", name: "", type: "bool" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              {
+                internalType: "address",
+                name: "_metadataAddress",
+                type: "address",
+              },
+            ],
+            name: "initialize",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "owner", type: "address" },
+              { internalType: "address", name: "operator", type: "address" },
+            ],
+            name: "isApprovedForAll",
+            outputs: [{ internalType: "bool", name: "", type: "bool" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            name: "lockDurations",
+            outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [],
+            name: "metadataAddress",
+            outputs: [{ internalType: "address", name: "", type: "address" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "to", type: "address" },
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+            ],
+            name: "mint",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [],
+            name: "name",
+            outputs: [{ internalType: "string", name: "", type: "string" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [],
+            name: "owner",
+            outputs: [{ internalType: "address", name: "", type: "address" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+            ],
+            name: "ownerOf",
+            outputs: [{ internalType: "address", name: "", type: "address" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [],
+            name: "renounceOwnership",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "oldDelegate", type: "address" },
+              { internalType: "address", name: "newDelegate", type: "address" },
+            ],
+            name: "replaceDelegate",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+            ],
+            name: "revoke",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "from", type: "address" },
+              { internalType: "address", name: "to", type: "address" },
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+            ],
+            name: "safeTransferFrom",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "from", type: "address" },
+              { internalType: "address", name: "to", type: "address" },
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+              { internalType: "bytes", name: "_data", type: "bytes" },
+            ],
+            name: "safeTransferFrom",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "operator", type: "address" },
+              { internalType: "bool", name: "approved", type: "bool" },
+            ],
+            name: "setApprovalForAll",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+              {
+                internalType: "uint256",
+                name: "lockDuration",
+                type: "uint256",
+              },
+            ],
+            name: "setLockDuration",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [
+              {
+                internalType: "address",
+                name: "_metadataAddress",
+                type: "address",
+              },
+            ],
+            name: "setMetadataAddress",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "bytes4", name: "interfaceId", type: "bytes4" },
+            ],
+            name: "supportsInterface",
+            outputs: [{ internalType: "bool", name: "", type: "bool" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [],
+            name: "symbol",
+            outputs: [{ internalType: "string", name: "", type: "string" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+            ],
+            name: "tokenURI",
+            outputs: [{ internalType: "string", name: "", type: "string" }],
+            stateMutability: "view",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "from", type: "address" },
+              { internalType: "address", name: "to", type: "address" },
+              { internalType: "uint256", name: "tokenId", type: "uint256" },
+            ],
+            name: "transferFrom",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "newOwner", type: "address" },
+            ],
+            name: "transferOwnership",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+          {
+            inputs: [
+              { internalType: "address", name: "delegate", type: "address" },
+              { internalType: "uint256", name: "roles", type: "uint256" },
+            ],
+            name: "updateDelegate",
+            outputs: [],
+            stateMutability: "nonpayable",
+            type: "function",
+          },
+        ],
+        params: { tokenId: `${tokenId}` },
+      },
+      {
+        headers: {
+          "X-API-Key": `${process.env.MORALIS_API_KEY}`,
+        },
+      }
+    );
+
+    if (!metadata.data)
+      return {
+        metadata: [],
+      };
+
+    const encoded = metadata.data.split(",").pop();
+
+    return {
+      metadata: JSON.parse(atob(encoded)).attributes,
+    };
+  } catch (e: any) {
     throw e;
   }
 }
