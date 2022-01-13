@@ -13,7 +13,7 @@ export default async function handler(
       .json(await getMetadata(contract as string, tokenId as string));
   } catch (e: any) {
     res.status(500).json({
-      error: e,
+      error: e.message,
     });
   }
 }

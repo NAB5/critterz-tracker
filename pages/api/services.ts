@@ -1503,6 +1503,7 @@ export async function getMetadata(contract: string, tokenId: string) {
       metadata: JSON.parse(atob(encoded)).attributes,
     };
   } catch (e: any) {
+    console.log(e);
     throw e;
   }
 }
