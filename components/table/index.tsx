@@ -7,12 +7,14 @@ const Row = ({
   profile,
   address,
   blockInfo,
+  critterzRented,
   critterzInfo,
 }: {
   className?: string;
   profile: any;
   blockInfo: any;
   critterzInfo: any;
+  critterzRented: number[];
   address: string;
 }) => {
   return (
@@ -37,6 +39,7 @@ const Row = ({
         </thead>
         <tbody>
           <RowPlayer
+            className="hover:bg-white/5 "
             blockEarned={blockInfo}
             timePerEpoch={profile.timePerEpoch}
             totalOwnedCritterz={critterzInfo.totalOwned}
@@ -45,6 +48,8 @@ const Row = ({
           {Object.keys(blockInfo.toClaim.rentalRewards).map((rentee, index) => {
             return (
               <RowRentee
+                className="hover:bg-white/5 "
+                critterzRented={critterzRented}
                 address={rentee}
                 ownerAddress={address}
                 key={index}

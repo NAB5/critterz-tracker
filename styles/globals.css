@@ -8,9 +8,14 @@
   * {
     /* cursor: none */
   }
+  html {
+    background: linear-gradient(180deg, #001412 0%, #000d00 100%);
+  }
 
   body {
     @apply min-h-screen;
+    overscroll-behavior-y: none;
     background: linear-gradient(180deg, #001412 0%, #000d00 100%);
+    transform: translate3d(0, 0, 0);
   }
 }

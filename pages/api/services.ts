@@ -953,3 +953,31 @@ export async function getPlayerInfo(address: string) {
     throw e;
   }
 }
+
+export async function getServerStats() {
+  try {
+    const usResponse = await axios.get(
+      `${process.env.MC_SERVERSTATS_ENDPOINT}/us.critterz.xyz`
+    );
+    const asiaResponse = await axios.get(
+      `${process.env.MC_SERVERSTATS_ENDPOINT}/asia.critterz.xyz`
+    );
+
+    const us = usResponse.data;
+    const asia = asiaResponse.data;
+
+    if (us.online && asia.online) {
+      return {
+        us: us.players.online,
+        asia: asia.players.online,
+      };
+    }
+
+    return {
+      us: 0,
+      asia: 0,
+    };
+  } catch (e) {
+    throw e;
+  }
+}

@@ -13,6 +13,7 @@ import { FaChartBar, FaRegCopy, FaHeart } from "react-icons/fa";
 import {
   getBlockAddress,
   getCritterzCount,
+  getCritterzRented,
   getPlayerInfo,
   getPlotsCount,
 } from "./api/services";
@@ -186,6 +187,7 @@ const Overview: NextPage = ({ data }) => {
               address={data.address}
               blockInfo={data.block}
               critterzInfo={data.critterz}
+              critterzRented={data.tokenHoldings.critterzRented.tokens}
             />
           </div>
 
@@ -209,6 +211,7 @@ export async function getServerSideProps(context: { params: any }) {
   try {
     const block = await getBlockAddress(address);
     const critterz = await getCritterzCount(address);
+    const critterzRented = await getCritterzRented(address);
     const plots = await getPlotsCount(address);
     const profile = await getPlayerInfo(address);
 
@@ -220,6 +223,9 @@ export async function getServerSideProps(context: { params: any }) {
           plots,
           address,
           profile,
+          tokenHoldings: {
+            critterzRented,
+          },
         },
       },
     };

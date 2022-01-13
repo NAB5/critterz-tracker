@@ -26,12 +26,13 @@ function getAverage(timePerEpoch: number[], days: number): any {
 const Row = ({
   className = "",
   address,
-  ownerAddress,
+  critterzRented,
   blockEarned,
 }: {
   className?: string;
   address: string;
   ownerAddress: string;
+  critterzRented: number[];
   blockEarned: any;
 }) => {
   const [playTime, setPlayTime] = useState(0);
@@ -41,34 +42,43 @@ const Row = ({
   );
   const [owned, setOwned] = useState(0);
   const [rented, setRented] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
-      const response = await axios.get(`/api/profile/${address}`);
-      const profile = response.data;
-      if (profile.containsMCInfo) {
-        setUsername(profile.name);
+      try {
+        const response = await axios.get(`/api/profile/${address}`);
+        const ownedTokenFetch = await axios.get(
+          `/api/critterz/${address}/owned`
+        );
+
+        const profile = response.data;
+        setPlayTime(getAverage(profile.timePerEpoch, 14).toFixed(2));
+
+        const ownedTokens = ownedTokenFetch.data.tokens;
+        setOwned(ownedTokens.length);
+
+        let intersect = ownedTokens.filter((x: any) =>
+          critterzRented.includes(x)
+        );
+        setRented(intersect.length);
+
+        if (profile.containsMCInfo) {
+          setUsername(profile.name);
+        }
+
+        setLoading(false);
+      } catch (e) {
+        console.log(e);
       }
-      setPlayTime(getAverage(profile.timePerEpoch, 14).toFixed(2));
-
-      const ownedTokenFetch = await axios.get(`/api/critterz/${address}/owned`);
-      const ownedTokens = ownedTokenFetch.data.tokens;
-      setOwned(ownedTokens.length);
-
-      const rentedTokenFetch = await axios.get(
-        `/api/critterz/${ownerAddress}/rented`
-      );
-
-      const rentedTokens = rentedTokenFetch.data.tokens;
-      let intersect = ownedTokens.filter((x: any) => rentedTokens.includes(x));
-
-      setRented(intersect.length);
     })();
   }, []);
 
   return (
-    <tr className="">
-      <td className="">
+    <tr
+      className={`hover:bg-white/5 ${loading ? " opacity-20 " : "opacity-100"}`}
+    >
+      <td>
         <Link href={`/${address}`}>
           <div className="flex items-center justify-center">
             <p className="hover:underline cursor-pointer ">

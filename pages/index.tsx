@@ -21,6 +21,7 @@ import {
   FaMapMarkedAlt,
   FaPaintBrush,
   FaHandshake,
+  FaServer,
 } from "react-icons/fa";
 
 import { RiRadarFill } from "react-icons/ri";
@@ -29,6 +30,7 @@ import {
   getCritterzStats,
   getPlotsPrice,
   getPlotsStats,
+  getServerStats,
 } from "./api/services";
 
 const Home: NextPage = ({ data }) => {
@@ -48,6 +50,11 @@ const Home: NextPage = ({ data }) => {
           <RiRadarFill />
           &nbsp;Critterz Tracker
         </div>
+
+        {/* DESCRIPTION */}
+        <p className="mt-2 text-xs text-gray-700 flex items-center hover:underline cursor-pointer">
+          track project statistics and player performance.
+        </p>
 
         <div className="w-5/6">
           <p className=" flex justify-end items-center text-sm m-1 text-right mt-10">
@@ -90,6 +97,24 @@ const Home: NextPage = ({ data }) => {
               ).toFixed(2)}
               unit="%"
               description="% staked"
+            />
+          </div>
+
+          <p className=" flex justify-end items-center text-sm m-1 text-right mt-10">
+            <FaServer />
+            &nbsp;server statistics.
+          </p>
+
+          <div className="flex flex-wrap justify-end">
+            <KPI
+              value={data.serverStats.us}
+              unit="US"
+              description="player count"
+            />
+            <KPI
+              value={data.serverStats.asia}
+              unit="ASIA"
+              description="player count"
             />
           </div>
 
@@ -151,7 +176,7 @@ const Home: NextPage = ({ data }) => {
             <FaHeart />
             &nbsp;created by nabs.eth.
           </p>
-          <p className=" flex justify-end items-center text-sm m-1 text-right">
+          <p className=" flex justify-end items-center text-sm m-1 text-right mb-10">
             Nabs#2157.
           </p>
         </div>
@@ -166,10 +191,12 @@ export async function getStaticProps() {
     const critterz = await getCritterzStats();
     const plots = await getPlotsStats();
     const plotPrice = await getPlotsPrice();
+    const serverStats = await getServerStats();
 
     const data = {
-      block: block,
-      critterz: critterz,
+      block,
+      critterz,
+      serverStats,
       plots: {
         ...plots,
         ...plotPrice,
