@@ -62,7 +62,7 @@ const Home: NextPage = ({ data }) => {
           )} Ξ floor. $${data.block.usdPrice.toFixed(2)}/BLOCK`}
         />
         <meta name="twitter:card" content="summary" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/critterz.gif" />
       </Head>
 
       {/* MAIN CONTENT */}

@@ -79,7 +79,7 @@ const Overview: NextPage = ({ data }) => {
           content={`${data.critterz.totalOwned} Critterz owned. ${data.critterz.totalRented} Critterz Rented. ${data.plots.totalOwned} Plots owned`}
         />
         <meta name="twitter:card" content="summary" />
-        <link rel="icon" href="/favicon.ico" />
+        <link rel="icon" href="/critterz.gif" />
       </Head>
 
       {/* MAIN CONTENT */}
