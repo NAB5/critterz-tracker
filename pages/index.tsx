@@ -38,7 +38,30 @@ const Home: NextPage = ({ data }) => {
     <div className="font-mono text-offwhite flex flex-col items-center justify-center min-h-screen">
       <Head>
         <title>Critterz Tracker</title>
-        <meta name="description" content="track your critterz journey" />
+        <meta property="og:image" content={`/critterz.gif`} />
+        <meta property="og:url" content="https://www.critterztracker.com" />
+        <meta property="og:determiner" content="Critterz Tracker" />
+        <meta name="twitter:creator" content="@_Nabs__" />
+        <meta name="twitter:title" content="Critterz Tracker" />
+        <meta
+          name="twitter:description"
+          content={`track your critterz journey. ${(
+            (data.critterz.stakedCount / data.critterz.stats.count) *
+            100
+          ).toFixed(2)}% staked. ${data.critterz.stats.floor_price.toFixed(
+            2
+          )} Ξ floor. $${data.block.usdPrice.toFixed(2)}/BLOCK`}
+        />
+        <meta
+          name="description"
+          content={`track your critterz journey. ${(
+            (data.critterz.stakedCount / data.critterz.stats.count) *
+            100
+          ).toFixed(2)}% staked. ${data.critterz.stats.floor_price.toFixed(
+            2
+          )} Ξ floor. $${data.block.usdPrice.toFixed(2)}/BLOCK`}
+        />
+        <meta name="twitter:card" content="summary" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 

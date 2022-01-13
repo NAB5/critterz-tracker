@@ -54,7 +54,7 @@ const SearchBar = ({ placeholder }: { placeholder: string }) => {
             id="wallet"
             name="wallet"
             autoComplete="off"
-            spellcheck="false"
+            spellCheck="false"
             placeholder={placeholder}
           />
           <button type="submit">

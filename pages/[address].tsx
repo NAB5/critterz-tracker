@@ -38,35 +38,37 @@ function getTotalBlock(block: any) {
   return totalBlock;
 }
 
-function getTotalPlots(plots: any, address: string) {
-  let totalOwnedPlots = 0;
-  let totalRentedPlots = 0;
-
-  totalOwnedPlots += plots.plot.total;
-
-  if (plots.sPlot.result) {
-    plots.sPlot.result.forEach((plot: any) => {
-      if (plot.owner_of.toLowerCase() === address.toLowerCase()) {
-        totalOwnedPlots++;
-      } else totalRentedPlots++;
-    });
-  }
-
-  return {
-    totalOwnedPlots,
-    totalRentedPlots,
-  };
-}
-
 const Overview: NextPage = ({ data }) => {
   return (
     <div className="font-mono text-offwhite flex flex-col items-center justify-center min-h-screen">
       <Head>
-        <title>
-          Critterz Tracker:{" "}
-          {data.address.slice(0, 5) + "..." + data.address.slice(-4)}
-        </title>
-        <meta name="description" content="track your critterz journey" />
+        <title>{`${
+          data.profile.containsMCInfo
+            ? data.profile.name
+            : data.profile.address.slice(0, 5) +
+              "..." +
+              data.profile.address.slice(-4)
+        }'s Profile | ${getTotalBlock(data.block).toFixed(0)} $BLOCK`}</title>
+        <meta
+          name="og:title"
+          content={`${data.profile.name}'s Profile | ${getTotalBlock(
+            data.block
+          ).toFixed(0)} $BLOCK`}
+        />
+        <meta property="og:image" content={data.profile.avatar} />
+        <meta property="og:url" content="https://www.critterztracker.com" />
+        <meta property="og:determiner" content="Critterz Tracker" />
+        <meta name="twitter:creator" content="@_Nabs__" />
+        {/* <meta name="title" content={`${data.profile.name}'s Profile'`} /> */}
+        <meta
+          name="twitter:description"
+          content={`${data.critterz.totalOwned} Critterz owned. ${data.critterz.totalRented} Critterz Rented. ${data.plots.totalOwned} Plots owned`}
+        />
+        <meta
+          name="description"
+          content={`${data.critterz.totalOwned} Critterz owned. ${data.critterz.totalRented} Critterz Rented. ${data.plots.totalOwned} Plots owned`}
+        />
+        <meta name="twitter:card" content="summary" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
