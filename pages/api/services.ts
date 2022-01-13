@@ -1499,8 +1499,9 @@ export async function getMetadata(contract: string, tokenId: string) {
 
     const encoded = metadata.data.split(",").pop();
 
+    const base64Decode = Buffer.from(encoded, "base64");
     return {
-      metadata: JSON.parse(atob(encoded)).attributes,
+      metadata: JSON.parse(base64Decode.toString()).attributes,
     };
   } catch (e: any) {
     console.log(e);
