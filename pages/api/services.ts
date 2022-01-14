@@ -2,6 +2,11 @@ import axios from "axios";
 import web3 from "web3-utils";
 import { request, gql } from "graphql-request";
 import dayjs from "dayjs";
+import Web3Eth from "web3-eth";
+import EthEns from "web3-eth-ens";
+
+const eth = new Web3Eth(process.env.ETH_PROVIDER);
+const ens = new EthEns(eth);
 
 let utc = require("dayjs/plugin/utc");
 dayjs.extend(utc);
@@ -45,10 +50,35 @@ function convertAddressToChecksum(address: string) {
   return checksumAddress;
 }
 
+async function convertUUIDtoAddress(uuid: string) {
+  const AddressQuery = gql`
+    query Account($where: account_bool_exp) {
+      account(where: $where) {
+        address
+      }
+    }
+  `;
+
+  const addressInfo = await request(
+    process.env.CRITTERZ_GRAPHQL_ENDPOINT as string,
+    AddressQuery,
+    {
+      where: {
+        minecraft_player_uuid: {
+          _eq: uuid,
+        },
+      },
+    }
+  );
+
+  if (!addressInfo.account.length)
+    throw Error("No critterz account linked to uuid");
+
+  return addressInfo.account[0].address;
+}
+
 //get $BLOCK holdings for address
 export async function getBlockAddress(address: string) {
-  address = convertAddressToChecksum(address);
-
   try {
     const walletHolding = await axios.get(
       `${process.env.MORALIS_WEB3_ENDPOINT}/${address}/erc20?chain=eth&token_addresses=${process.env.NEXT_PUBLIC_BLOCK_CONTRACT_ADDRESS}`,
@@ -93,7 +123,6 @@ export async function getBlockPrice() {
 
 export async function getCritterzCount(address: string) {
   try {
-    address = convertAddressToChecksum(address);
     const OwnerTokenCountQuery = gql`
       query StakedOwnerTokenCount(
         $account_address: String!
@@ -169,7 +198,6 @@ export async function getCritterzCount(address: string) {
 
 export async function getCritterzRented(address: string) {
   try {
-    address = convertAddressToChecksum(address);
     const RentedTokensQuery = gql`
       query Tokens_of_renter($args: tokens_of_renter_args!) {
         tokens_of_renter(args: $args) {
@@ -206,7 +234,6 @@ export async function getCritterzRented(address: string) {
 
 export async function getCritterzOwned(address: string) {
   try {
-    address = convertAddressToChecksum(address);
     const OwnerTokensQuery = gql`
       query Tokens_of_owner($args: tokens_of_owner_args!) {
         tokens_of_owner(args: $args) {
@@ -317,7 +344,6 @@ export async function getCritterzStats() {
 
 export async function getPlotsCount(address: string) {
   try {
-    address = convertAddressToChecksum(address);
     const OwnerTokenCountQuery = gql`
       query StakedOwnerTokenCount(
         $account_address: String!
@@ -861,8 +887,6 @@ export async function getPlayerInfo(address: string) {
   let utcToday = dayjs.utc().hour(0).minute(0).second(0);
 
   try {
-    address = convertAddressToChecksum(address);
-
     const AccountInfoQuery = gql`
       query Account($where: account_bool_exp) {
         account(where: $where) {
@@ -995,31 +1019,6 @@ export async function getServerStats() {
     throw e;
   }
 }
-
-// export async function getTokenMetadata(tokenId: string, contract: string) {
-//   try {
-//     const tokenMetadata = await axios.get(
-//       // https://deep-index.moralis.io/api/v2/nft/asd/asd?chain=eth&format=decimal
-//       `${process.env.MORALIS_WEB3_ENDPOINT}/nft/${contract}/${tokenId}?chain=eth&format=decimal`,
-//       {
-//         headers: {
-//           "X-API-Key": `${process.env.MORALIS_API_KEY}`,
-//         },
-//       }
-//     );
-
-//     // console.log(tokenMetadata.data.token_uri);
-//     // let metadata = Buffer.from(tokenMetadata.data.token_uri, "base64");
-//     // console.log(metadata.toString());
-//     // metadata = JSON.parse(metadata.toString());
-
-//     return {
-//       test: tokenMetadata.data.token_uri,
-//     };
-//   } catch (e: any) {
-//     throw e;
-//   }
-// }
 
 export async function getMetadata(contract: string, tokenId: string) {
   try {
@@ -1506,5 +1505,35 @@ export async function getMetadata(contract: string, tokenId: string) {
   } catch (e: any) {
     console.log(e);
     throw e;
+  }
+}
+
+export async function getResolvedAddress(toResolve: string) {
+  try {
+    //normal address
+    if (web3.isAddress(toResolve)) {
+      return {
+        address: web3.toChecksumAddress(toResolve),
+      };
+    }
+
+    //eth address
+    if (toResolve.slice(-4) === ".eth") {
+      return {
+        address: await ens.getAddress(toResolve),
+      };
+    }
+
+    //minecraft name
+    const mcResponse = await axios(
+      `${process.env.MC_API_ENDPOINT}/profile/${toResolve}`
+    );
+    const uuid = mcResponse.data.id;
+
+    return {
+      address: await convertUUIDtoAddress(uuid),
+    };
+  } catch (e) {
+    throw Error("Could not resolve address");
   }
 }

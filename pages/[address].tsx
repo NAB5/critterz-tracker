@@ -26,6 +26,7 @@ import {
   getCritterzRented,
   getPlayerInfo,
   getPlotsCount,
+  getResolvedAddress,
 } from "./api/services";
 import Chart from "../components/chart";
 
@@ -73,11 +74,11 @@ const Overview: NextPage = ({ data }) => {
         {/* <meta name="title" content={`${data.profile.name}'s Profile'`} /> */}
         <meta
           name="twitter:description"
-          content={`${data.critterz.totalOwned} Critterz owned. ${data.critterz.totalRented} Critterz Rented. ${data.plots.totalOwned} Plots owned`}
+          content={`${data.critterz.totalOwned} Critterz owned. ${data.critterz.totalRented} Critterz Rented. ${data.plots.totalOwned} Plots owned. created by nabs.eth <3`}
         />
         <meta
           name="description"
-          content={`${data.critterz.totalOwned} Critterz owned. ${data.critterz.totalRented} Critterz Rented. ${data.plots.totalOwned} Plots owned`}
+          content={`${data.critterz.totalOwned} Critterz owned. ${data.critterz.totalRented} Critterz Rented. ${data.plots.totalOwned} Plots owned. created by nabs.eth <3`}
         />
         <meta name="twitter:card" content="summary" />
         <link rel="icon" href="/critterz.gif" />
@@ -111,7 +112,7 @@ const Overview: NextPage = ({ data }) => {
           <FaRegCopy />
         </p>
         <Status
-          logoutTimestamp={data.profile.logoutTimestamp}
+          logoutTimestamp={data.profile.lastLogout}
           timePerEpoch={data.profile.timePerEpoch}
         />
 
@@ -292,9 +293,12 @@ const Overview: NextPage = ({ data }) => {
 
 export async function getServerSideProps(context: { params: any }) {
   const { params } = context;
-  const { address } = params;
+  let { address } = params;
 
   try {
+    const resolved = await getResolvedAddress(address);
+    address = resolved.address;
+
     const block = await getBlockAddress(address);
     const critterz = await getCritterzCount(address);
     const critterzRented = await getCritterzRented(address);

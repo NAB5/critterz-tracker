@@ -36,12 +36,17 @@ const SearchBar = ({ placeholder }: { placeholder: string }) => {
           values: Values,
           { setSubmitting }: FormikHelpers<Values>
         ) => {
-          try {
-            const wallet = convertAddressToChecksum(values.wallet);
-          } catch (e) {
+          // try {
+          //   const wallet = convertAddressToChecksum(values.wallet);
+          // } catch (e) {
+          //   setError(true);
+          //   return;
+          // }
+          if (values.wallet === "" || values.wallet.includes(" ")) {
             setError(true);
             return;
           }
+
           setError(false);
           setSubmitting(false);
           setLoading(true);

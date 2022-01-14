@@ -57,7 +57,9 @@ const Home: NextPage = ({ data }) => {
             100
           ).toFixed(2)}% staked. ${data.critterz.stats.floor_price.toFixed(
             2
-          )} Ξ floor. $${data.block.usdPrice.toFixed(2)}/BLOCK`}
+          )} Ξ floor. $${data.block.usdPrice.toFixed(
+            2
+          )}/BLOCK. created by nabs.eth <3`}
         />
         <meta
           name="description"
@@ -66,7 +68,9 @@ const Home: NextPage = ({ data }) => {
             100
           ).toFixed(2)}% staked. ${data.critterz.stats.floor_price.toFixed(
             2
-          )} Ξ floor. $${data.block.usdPrice.toFixed(2)}/BLOCK`}
+          )} Ξ floor. $${data.block.usdPrice.toFixed(
+            2
+          )}/BLOCK. created by nabs.eth <3`}
         />
         <meta name="twitter:card" content="summary" />
         <link rel="icon" href="/critterz.gif" />
@@ -91,7 +95,7 @@ const Home: NextPage = ({ data }) => {
             <FaBook />
             &nbsp;overview of your critterz journey.
           </p>
-          <SearchBar placeholder="Enter Address..." />
+          <SearchBar placeholder="Enter MC username/ENS name/Wallet Address..." />
 
           {/* STATS */}
           <p className=" flex justify-end items-center text-sm m-1 text-right mt-10">
