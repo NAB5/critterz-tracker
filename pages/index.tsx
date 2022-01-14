@@ -238,9 +238,7 @@ export async function getStaticProps() {
       revalidate: 60, // In seconds
     };
   } catch (e) {
-    return {
-      notFound: true,
-    };
+    console.log("ERROR: Failed to generate main home page", e);
   }
 }
 
