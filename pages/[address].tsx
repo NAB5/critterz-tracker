@@ -66,7 +66,7 @@ const Overview: NextPage = ({ data }) => {
           ).toFixed(0)} $BLOCK`}
         />
         <meta property="og:image" content={data.profile.avatar} />
-        <meta property="twitter:image:alt" content={data.profile.avatar} />
+        <meta property="twitter:image" content={data.profile.avatar} />
         <meta property="og:url" content="https://www.critterztracker.com" />
         <meta property="og:determiner" content="Critterz Tracker" />
         <meta name="twitter:creator" content="@_Nabs__" />

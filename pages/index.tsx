@@ -38,8 +38,11 @@ const Home: NextPage = ({ data }) => {
     <div className="font-mono text-offwhite flex flex-col items-center justify-center min-h-screen">
       <Head>
         <title>Critterz Tracker</title>
-        <meta property="og:image" content={`/ico.svg`} />
-        <meta property="twitter:image:alt" content={`/critterz.gif`} />
+        <meta property="og:image" content={`${process.env.BASE_URL}/ico.png`} />
+        <meta
+          property="twitter:image"
+          content={`${process.env.BASE_URL}/ico.png`}
+        />
         <meta property="og:url" content="https://www.critterztracker.com" />
         <meta property="og:determiner" content="Critterz Tracker" />
         <meta name="twitter:creator" content="@_Nabs__" />
