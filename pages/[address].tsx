@@ -41,6 +41,9 @@ function getTotalBlock(block: any) {
   if (block.toClaim) {
     totalBlock += block.toClaim.playReward;
 
+    if (block.toClaim.inGameMarketplaceReward)
+      totalBlock += block.toClaim.inGameMarketplaceReward;
+
     for (const renter in block.toClaim.rentalRewards) {
       totalBlock += block.toClaim.rentalRewards[renter];
     }
