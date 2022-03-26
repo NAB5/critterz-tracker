@@ -141,7 +141,11 @@ const Home: NextPage = ({ data }) => {
 
           <div className="flex flex-wrap justify-end">
             <KPI
-              value={data.serverStats.us}
+              value={
+                data.serverStats.us +
+                data.serverStats.asia +
+                data.serverStats.bedrock
+              }
               unit="online"
               description="player count"
             />
@@ -205,14 +209,6 @@ const Home: NextPage = ({ data }) => {
               Icon={FaCode}
             />
           </div>
-
-          <p className=" flex justify-end items-center text-sm m-1 text-right mt-10">
-            <FaHeart />
-            &nbsp;created by nabs.eth.
-          </p>
-          <p className=" flex justify-end items-center text-sm m-1 text-right mb-10">
-            Nabs#2157.
-          </p>
         </div>
       </main>
     </div>

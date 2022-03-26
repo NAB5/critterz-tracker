@@ -986,6 +986,7 @@ export async function getPlayerInfo(address: string) {
         username: address,
         avatar: "https://crafthead.net/avatar/Notch",
         address,
+        // timestamp: utcToday.subtract(13, "day").format(),
         uuid: accountInfo.account[0].minecraft_player_uuid,
         lastLogout,
         // playerLog: activity.player_log,
@@ -1000,13 +1001,25 @@ export async function getPlayerInfo(address: string) {
 export async function getServerStats() {
   try {
     const usResponse = await axios.get(
-      `${process.env.MC_SERVERSTATS_ENDPOINT}/us.critterz.xyz`
+      `${process.env.MC_SERVERSTATS_ENDPOINT}/mc.critterz.xyz`
     );
     const us = usResponse.data;
+
+    const bedrockResponse = await axios.get(
+      `${process.env.MC_SERVERSTATS_ENDPOINT}/bedrock.critterz.xyz`
+    );
+    const bedrock = bedrockResponse.data;
+
+    const asiaResponse = await axios.get(
+      `${process.env.MC_SERVERSTATS_ENDPOINT}/asia.critterz.xyz`
+    );
+    const asia = asiaResponse.data;
 
     if (us.online) {
       return {
         us: us.players.online,
+        asia: asia.players.online,
+        bedrock: bedrock.players.online,
         status: "online",
       };
     }
