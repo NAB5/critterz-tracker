@@ -141,11 +141,7 @@ const Home: NextPage = ({ data }) => {
 
           <div className="flex flex-wrap justify-end">
             <KPI
-              value={
-                data.serverStats.us +
-                data.serverStats.asia +
-                data.serverStats.bedrock
-              }
+              value={data.serverStats.us}
               unit="online"
               description="player count"
             />
