@@ -29,6 +29,7 @@ import {
   getResolvedAddress,
 } from "./api/services";
 import Chart from "../components/chart";
+import { useEffect, useState } from "react";
 
 function getTotalBlock(block: any) {
   let totalBlock = 0;
@@ -56,6 +57,16 @@ function getTotalBlock(block: any) {
 }
 
 const Overview: NextPage = ({ data }) => {
+  const [block, setBlock] = useState<any>();
+
+  useEffect(() => {
+    (async () => {
+      const response = await getBlockAddress(data.address);
+
+      setBlock(response);
+    })();
+  }, []);
+
   return (
     <div className="font-mono text-offwhite flex flex-col items-center justify-center min-h-screen">
       <Head>
@@ -65,13 +76,8 @@ const Overview: NextPage = ({ data }) => {
             : data.profile.address.slice(0, 5) +
               "..." +
               data.profile.address.slice(-4)
-        }'s Profile | ${getTotalBlock(data.block).toFixed(0)} $BLOCK`}</title>
-        <meta
-          name="og:title"
-          content={`${data.profile.name}'s Profile | ${getTotalBlock(
-            data.block
-          ).toFixed(0)} $BLOCK`}
-        />
+        }'s Profile`}</title>
+        <meta name="og:title" content={`${data.profile.name}'s Profile`} />
         <meta property="og:image" content={data.profile.avatar} />
         <meta property="twitter:image" content={data.profile.avatar} />
         <meta property="og:url" content="https://www.critterztracker.com" />
@@ -188,7 +194,7 @@ const Overview: NextPage = ({ data }) => {
               />
             )}
             <KPI
-              value={getTotalBlock(data.block).toFixed(2)}
+              value={!block ? "Loading..." : getTotalBlock(block).toFixed(2)}
               unit="$block"
               description="total $block"
             />
@@ -274,13 +280,15 @@ const Overview: NextPage = ({ data }) => {
           <div className="border border-gray-700">
             <Chart timePerEpoch={data.profile.timePerEpoch} />
             <div className="max-h-72 overflow-auto">
-              <Table
-                profile={data.profile}
-                address={data.address}
-                blockInfo={data.block}
-                critterzInfo={data.critterz}
-                critterzRented={data.tokenHoldings.critterzRented.tokens}
-              />
+              {block && (
+                <Table
+                  profile={data.profile}
+                  address={data.address}
+                  blockInfo={block}
+                  critterzInfo={data.critterz}
+                  critterzRented={data.tokenHoldings.critterzRented.tokens}
+                />
+              )}
             </div>
           </div>
 
@@ -305,17 +313,26 @@ export async function getServerSideProps(context: { params: any }) {
     const resolved = await getResolvedAddress(address);
     address = resolved.address;
 
-    const block = await getBlockAddress(address);
-    const critterz = await getCritterzCount(address);
-    const critterzRented = await getCritterzRented(address);
-    const critterzOwned = await getCritterzOwned(address);
-    const plots = await getPlotsCount(address);
-    const profile = await getPlayerInfo(address);
+    // const block = await getBlockAddress(address);
+    const [critterz, critterzRented, critterzOwned, plots, profile] =
+      await Promise.all([
+        getCritterzCount(address),
+        getCritterzRented(address),
+        getCritterzOwned(address),
+        getPlotsCount(address),
+        getPlayerInfo(address),
+      ]);
+
+    // const critterz = await getCritterzCount(address);
+    // const critterzRented = await getCritterzRented(address);
+    // const critterzOwned = await getCritterzOwned(address);
+    // const plots = await getPlotsCount(address);
+    // const profile = await getPlayerInfo(address);
 
     return {
       props: {
+        key: address,
         data: {
-          block,
           critterz,
           plots,
           address,

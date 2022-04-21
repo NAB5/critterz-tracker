@@ -80,23 +80,22 @@ async function convertUUIDtoAddress(uuid: string) {
 //get $BLOCK holdings for address
 export async function getBlockAddress(address: string) {
   try {
-    const walletHolding = await axios.get(
-      `${process.env.MORALIS_WEB3_ENDPOINT}/${address}/erc20?chain=eth&token_addresses=${process.env.NEXT_PUBLIC_BLOCK_CONTRACT_ADDRESS}`,
-      {
-        headers: {
-          "X-API-Key": `${process.env.MORALIS_API_KEY}`,
-        },
-      }
-    );
+    // const walletHolding = await axios.get(
+    //   `${process.env.MORALIS_WEB3_ENDPOINT}/${address}/erc20?chain=eth&token_addresses=${process.env.NEXT_PUBLIC_BLOCK_CONTRACT_ADDRESS}`,
+    //   {
+    //     headers: {
+    //       "X-API-Key": `${process.env.MORALIS_API_KEY}`,
+    //     },
+    //   }
+    // );
 
-    const walletData = walletHolding.data;
+    // const walletData = walletHolding.data;
 
     const claimHolding = await axios.get(
-      `${process.env.CRITTERZ_DATA_ENDPOINT}/block/reward/${address}`
+      `${process.env.NEXT_PUBLIC_CRITTERZ_DATA_ENDPOINT}/block/reward/${address}`
     );
     const claimData = claimHolding.data;
     return {
-      wallet: walletData[0] || null,
       toClaim: claimData,
     };
   } catch (e: any) {
