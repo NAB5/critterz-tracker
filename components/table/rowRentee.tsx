@@ -82,13 +82,17 @@ const Row = ({
     >
       <td className="pl-4">
         <Link href={`/${address}`}>
-          <div className="flex items-center">
+          <a
+            className="flex items-center"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <p className="hover:underline cursor-pointer ">
               {username}({rented}/{owned})
             </p>
             &nbsp;
             <FaExternalLinkAlt />
-          </div>
+          </a>
         </Link>
       </td>
       <td className="text-center">{blockEarned.toFixed(2)}</td>
